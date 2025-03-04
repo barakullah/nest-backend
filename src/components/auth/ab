@@ -1,0 +1,1865 @@
+<script>
+
+   
+var disableBtn=false //for disabling sendOtp BTN
+var disableSubmitBtn=true
+//send otp using whatsapp api
+ async function sendMessage(to, message) {
+         disableBtn=true
+         const button = document.getElementById("otpButton");
+         button.disabled=true
+       const instanceId = "instance90678";
+    const token = "g8ju55ve99tofus6";
+    const ultramsgUrl = `https://api.ultramsg.com/${instanceId}/messages/chat`;
+      try {
+        const response = await fetch(ultramsgUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token,
+            to: to,
+            body: message,
+          }),
+        });
+        const success = document.getElementById("success-message");
+        success.style.display = "inline";
+        const result = await response.json();
+        setCookie("otp",message,1)
+       const otp2El= document.getElementById("otp-2")
+       otp2El.focus()
+      
+        console.log(result);
+      } catch (error) {
+          const errorMsg = document.getElementById("error-message");
+ errorMsg.style.display = "inline";
+          button.disabled=false
+        console.error("Error sending message:", error);
+      }
+    }
+//verify otp function
+function verifyOtp(userOtp){
+    console.log("i am in verifyOtp")
+        const success = document.getElementById("success-message");
+         const errorMsg = document.getElementById("error-message");
+        success.style.display = "none";
+         errorMsg.style.display = "none";
+        const cookieOtp=getCookie("otp")
+        console.log("cookie otp",cookieOtp);
+        console.log("user otp",userOtp);
+        if(cookieOtp===userOtp){
+        success.style.display = "inline";
+        success.value="OTP verified successfully"
+        disableSubmitBtn=false
+        }
+        else{
+            errorMsg.style.display = "inline";
+            errorMsg.value="OTP is incorrect"
+        }
+    
+}
+
+
+//automatic jump to next otp input
+document.addEventListener("DOMContentLoaded", () => {
+const inputs = document.querySelectorAll("#otp-inputs input");
+function updateInput() {
+  let inputValue = Array.from(inputs).reduce(
+    function (otp, input) {
+      otp += (input.value.length) ? input.value : null;
+      return otp;
+    },
+    ""
+  );
+  console.log("final", inputValue.length)
+  document.querySelector("input[name=otp]").value = inputValue;
+  
+  if ( inputValue.length===4){
+      verifyOtp(inputValue)
+  }
+}
+console.log("inputs are",inputs)
+for (let i = 0; i < inputs.length; i++) {
+  const input = inputs[i];
+
+  input.addEventListener("input", function () {
+    // handling normal input
+    if (input.value.length == 1 && i+1 < inputs.length) {
+     inputs[i+1].focus();
+    }
+   // if a value is pasted, put each character to each of the next input
+if (input.value.length > 1) {
+  // sanitise input
+  if (isNaN(input.value)) {
+    input.value = "";
+    updateInput()
+    return;
+  }
+
+  // split characters to array
+  const chars = input.value.split('');
+
+  for (let pos = 0; pos < chars.length; pos++) {
+    // if length exceeded the number of inputs, stop
+    if (pos + i >= inputs.length) break;
+
+    // paste value
+    let targetInput = inputs[pos + i];
+    targetInput.value = chars[pos];
+  }
+
+  // focus the input next to the last pasted character
+  let focus_index = Math.min(inputs.length - 1, i + chars.length);
+  inputs[focus_index].focus();
+  
+}
+ updateInput();
+  });
+  input.addEventListener("keydown", function (e) {
+  // left button
+  if (e.keyCode == 37) {
+    if (i > 0) {
+      e.preventDefault();
+      inputs[i-1].focus();
+      inputs[i-1].select();
+    }
+    updateInput()
+    return;
+  }
+
+  // right button
+  if (e.keyCode == 39) {
+    if (i+1 < inputs.length) {
+      e.preventDefault();
+      inputs[i+1].focus();
+      inputs[i+1].select();
+    }
+    updateInput()
+    return;
+  }
+
+  /* ... other codes (c) ... */
+})
+}
+})
+  const otpVal4=document.getElementById("otp-5")
+  otpVal4.addEventListener("input",verifyOtp())
+document.addEventListener("DOMContentLoaded", function () {
+    //automatically calling verify otp function
+    
+    
+  // Select all telephone input fields
+  const phoneInputs = document.querySelectorAll("input[type='tel']");
+
+      const telElement = document.getElementById("form-field-phone");
+ 
+    telElement.addEventListener("input", function() {
+         const tel = document.getElementById("form-field-phone").value;
+        console.log("hi there",tel)
+      // When the value of the input changes, update the message
+       if(tel){
+          console.log("hi there")
+      telElement.setCustomValidity("");
+          telElement.reportValidity();
+
+      }
+    });
+  phoneInputs.forEach((input) => {
+      
+    // Function to clean the placeholder
+    const cleanPlaceholder = (val) => {
+        console.log("val is",val)
+          const element = document.getElementsByClassName('iti__selected-country')[0];
+          if(!val)
+          {
+          const title = element.getAttribute('title');
+
+//getting country
+
+          let country_code=title.split(":")[1]
+console.log("country code", country_code)
+
+      let placeholder = input.getAttribute("placeholder");
+      console.log("placeholder code", placeholder)
+      if (placeholder.trim().startsWith(country_code.trim())) {
+          console.log("i am in")
+    // Remove the leading "0" after the country code
+    const updatedPlaceholder = placeholder.replace(`${country_code.trim()}0`, country_code.trim());
+ 
+     input.setAttribute("placeholder", updatedPlaceholder);
+  }}
+  else{
+       let placeholder = input.getAttribute("placeholder");
+     console.log("in else",placeholder)
+     input.setAttribute("placeholder", "+971501234567");
+  }
+
+}
+      
+  
+
+    // Run once on page load
+
+
+
+    // Listen for changes in the country code (triggered by intl-tel-input)
+    input.addEventListener("countrychange", function () {
+      setTimeout(cleanPlaceholder(false), 50); // Small delay to ensure placeholder is updated
+    });
+  });
+});
+    // Function to get UTM parameters from the current URL
+    const countriesCodes = [
+  {
+    country: "Afghanistan",
+    twoDigitsIso: "AF",
+    threeDigitsIso: "AFG",
+    dialCode: "004",
+  },
+  {
+    country: "Albania",
+    twoDigitsIso: "AL",
+    threeDigitsIso: "ALB",
+    dialCode: "008",
+  },
+  {
+    country: "Algeria",
+    twoDigitsIso: "DZ",
+    threeDigitsIso: "DZA",
+    dialCode: "012",
+  },
+  {
+    country: "American Samoa",
+    twoDigitsIso: "AS",
+    threeDigitsIso: "ASM",
+    dialCode: "016",
+  },
+  {
+    country: "Andorra",
+    twoDigitsIso: "AD",
+    threeDigitsIso: "AND",
+    dialCode: "020",
+  },
+  {
+    country: "Angola",
+    twoDigitsIso: "AO",
+    threeDigitsIso: "AGO",
+    dialCode: "024",
+  },
+  {
+    country: "Anguilla",
+    twoDigitsIso: "AI",
+    threeDigitsIso: "AIA",
+    dialCode: "660",
+  },
+  {
+    country: "Antarctica",
+    twoDigitsIso: "AQ",
+    threeDigitsIso: "ATA",
+    dialCode: "010",
+  },
+  {
+    country: "Antigua and Barbuda",
+    twoDigitsIso: "AG",
+    threeDigitsIso: "ATG",
+    dialCode: "028",
+  },
+  {
+    country: "Argentina",
+    twoDigitsIso: "AR",
+    threeDigitsIso: "ARG",
+    dialCode: "032",
+  },
+  {
+    country: "Armenia",
+    twoDigitsIso: "AM",
+    threeDigitsIso: "ARM",
+    dialCode: "051",
+  },
+  {
+    country: "Aruba",
+    twoDigitsIso: "AW",
+    threeDigitsIso: "ABW",
+    dialCode: "533",
+  },
+  {
+    country: "Australia",
+    twoDigitsIso: "AU",
+    threeDigitsIso: "AUS",
+    dialCode: "036",
+  },
+  {
+    country: "Austria",
+    twoDigitsIso: "AT",
+    threeDigitsIso: "AUT",
+    dialCode: "040",
+  },
+  {
+    country: "Azerbaijan",
+    twoDigitsIso: "AZ",
+    threeDigitsIso: "AZE",
+    dialCode: "031",
+  },
+  {
+    country: "Bahamas",
+    twoDigitsIso: "BS",
+    threeDigitsIso: "BHS",
+    dialCode: "044",
+  },
+  {
+    country: "Bahrain",
+    twoDigitsIso: "BH",
+    threeDigitsIso: "BHR",
+    dialCode: "048",
+  },
+  {
+    country: "Bangladesh",
+    twoDigitsIso: "BD",
+    threeDigitsIso: "BGD",
+    dialCode: "050",
+  },
+  {
+    country: "Barbados",
+    twoDigitsIso: "BB",
+    threeDigitsIso: "BRB",
+    dialCode: "052",
+  },
+  {
+    country: "Belarus",
+    twoDigitsIso: "BY",
+    threeDigitsIso: "BLR",
+    dialCode: "112",
+  },
+  {
+    country: "Belgium",
+    twoDigitsIso: "BE",
+    threeDigitsIso: "BEL",
+    dialCode: "056",
+  },
+  {
+    country: "Belize",
+    twoDigitsIso: "BZ",
+    threeDigitsIso: "BLZ",
+    dialCode: "084",
+  },
+  {
+    country: "Benin",
+    twoDigitsIso: "BJ",
+    threeDigitsIso: "BEN",
+    dialCode: "204",
+  },
+  {
+    country: "Bermuda",
+    twoDigitsIso: "BM",
+    threeDigitsIso: "BMU",
+    dialCode: "060",
+  },
+  {
+    country: "Bhutan",
+    twoDigitsIso: "BT",
+    threeDigitsIso: "BTN",
+    dialCode: "064",
+  },
+  {
+    country: "Bolivia (Plurinational State of)",
+    twoDigitsIso: "BO",
+    threeDigitsIso: "BOL",
+    dialCode: "068",
+  },
+  {
+    country: "Bonaire, Sint Eustatius and Saba",
+    twoDigitsIso: "BQ",
+    threeDigitsIso: "BES",
+    dialCode: "535",
+  },
+  {
+    country: "Bosnia and Herzegovina",
+    twoDigitsIso: "BA",
+    threeDigitsIso: "BIH",
+    dialCode: "070",
+  },
+  {
+    country: "Botswana",
+    twoDigitsIso: "BW",
+    threeDigitsIso: "BWA",
+    dialCode: "072",
+  },
+  {
+    country: "Bouvet Island",
+    twoDigitsIso: "BV",
+    threeDigitsIso: "BVT",
+    dialCode: "074",
+  },
+  {
+    country: "Brazil",
+    twoDigitsIso: "BR",
+    threeDigitsIso: "BRA",
+    dialCode: "076",
+  },
+  {
+    country: "British Indian Ocean Territory",
+    twoDigitsIso: "IO",
+    threeDigitsIso: "IOT",
+    dialCode: "086",
+  },
+  {
+    country: "Brunei Darussalam",
+    twoDigitsIso: "BN",
+    threeDigitsIso: "BRN",
+    dialCode: "096",
+  },
+  {
+    country: "Bulgaria",
+    twoDigitsIso: "BG",
+    threeDigitsIso: "BGR",
+    dialCode: "100",
+  },
+  {
+    country: "Burkina Faso",
+    twoDigitsIso: "BF",
+    threeDigitsIso: "BFA",
+    dialCode: "854",
+  },
+  {
+    country: "Burundi",
+    twoDigitsIso: "BI",
+    threeDigitsIso: "BDI",
+    dialCode: "108",
+  },
+  {
+    country: "Cabo Verde",
+    twoDigitsIso: "CV",
+    threeDigitsIso: "CPV",
+    dialCode: "132",
+  },
+  {
+    country: "Cambodia",
+    twoDigitsIso: "KH",
+    threeDigitsIso: "KHM",
+    dialCode: "116",
+  },
+  {
+    country: "Cameroon",
+    twoDigitsIso: "CM",
+    threeDigitsIso: "CMR",
+    dialCode: "120",
+  },
+  {
+    country: "Canada",
+    twoDigitsIso: "CA",
+    threeDigitsIso: "CAN",
+    dialCode: "124",
+  },
+  {
+    country: "Cayman Islands",
+    twoDigitsIso: "KY",
+    threeDigitsIso: "CYM",
+    dialCode: "136",
+  },
+  {
+    country: "Central African Republic",
+    twoDigitsIso: "CF",
+    threeDigitsIso: "CAF",
+    dialCode: "140",
+  },
+  {
+    country: "Chad",
+    twoDigitsIso: "TD",
+    threeDigitsIso: "TCD",
+    dialCode: "148",
+  },
+  {
+    country: "Chile",
+    twoDigitsIso: "CL",
+    threeDigitsIso: "CHL",
+    dialCode: "152",
+  },
+  {
+    country: "China",
+    twoDigitsIso: "CN",
+    threeDigitsIso: "CHN",
+    dialCode: "156",
+  },
+  {
+    country: "Christmas Island",
+    twoDigitsIso: "CX",
+    threeDigitsIso: "CXR",
+    dialCode: "162",
+  },
+  {
+    country: "Cocos (Keeling) Islands",
+    twoDigitsIso: "CC",
+    threeDigitsIso: "CCK",
+    dialCode: "166",
+  },
+  {
+    country: "Colombia",
+    twoDigitsIso: "CO",
+    threeDigitsIso: "COL",
+    dialCode: "170",
+  },
+  {
+    country: "Comoros",
+    twoDigitsIso: "KM",
+    threeDigitsIso: "COM",
+    dialCode: "174",
+  },
+  {
+    country: "Congo (the Democratic Republic of the)",
+    twoDigitsIso: "CD",
+    threeDigitsIso: "COD",
+    dialCode: "180",
+  },
+  {
+    country: "Congo",
+    twoDigitsIso: "CG",
+    threeDigitsIso: "COG",
+    dialCode: "178",
+  },
+  {
+    country: "Cook Islands",
+    twoDigitsIso: "CK",
+    threeDigitsIso: "COK",
+    dialCode: "184",
+  },
+  {
+    country: "Costa Rica",
+    twoDigitsIso: "CR",
+    threeDigitsIso: "CRI",
+    dialCode: "188",
+  },
+  {
+    country: "Croatia",
+    twoDigitsIso: "HR",
+    threeDigitsIso: "HRV",
+    dialCode: "191",
+  },
+  {
+    country: "Cuba",
+    twoDigitsIso: "CU",
+    threeDigitsIso: "CUB",
+    dialCode: "192",
+  },
+  {
+    country: "Curaçao",
+    twoDigitsIso: "CW",
+    threeDigitsIso: "CUW",
+    dialCode: "531",
+  },
+  {
+    country: "Cyprus",
+    twoDigitsIso: "CY",
+    threeDigitsIso: "CYP",
+    dialCode: "196",
+  },
+  {
+    country: "Czechia",
+    twoDigitsIso: "CZ",
+    threeDigitsIso: "CZE",
+    dialCode: "203",
+  },
+  {
+    country: "Côte d'Ivoire",
+    twoDigitsIso: "CI",
+    threeDigitsIso: "CIV",
+    dialCode: "384",
+  },
+  {
+    country: "Denmark",
+    twoDigitsIso: "DK",
+    threeDigitsIso: "DNK",
+    dialCode: "208",
+  },
+  {
+    country: "Djibouti",
+    twoDigitsIso: "DJ",
+    threeDigitsIso: "DJI",
+    dialCode: "262",
+  },
+  {
+    country: "Dominica",
+    twoDigitsIso: "DM",
+    threeDigitsIso: "DMA",
+    dialCode: "212",
+  },
+  {
+    country: "Dominican Republic",
+    twoDigitsIso: "DO",
+    threeDigitsIso: "DOM",
+    dialCode: "214",
+  },
+  {
+    country: "Ecuador",
+    twoDigitsIso: "EC",
+    threeDigitsIso: "ECU",
+    dialCode: "218",
+  },
+  {
+    country: "Egypt",
+    twoDigitsIso: "EG",
+    threeDigitsIso: "EGY",
+    dialCode: "818",
+  },
+  {
+    country: "El Salvador",
+    twoDigitsIso: "SV",
+    threeDigitsIso: "SLV",
+    dialCode: "222",
+  },
+  {
+    country: "Equatorial Guinea",
+    twoDigitsIso: "GQ",
+    threeDigitsIso: "GNQ",
+    dialCode: "226",
+  },
+  {
+    country: "Eritrea",
+    twoDigitsIso: "ER",
+    threeDigitsIso: "ERI",
+    dialCode: "232",
+  },
+  {
+    country: "Estonia",
+    twoDigitsIso: "EE",
+    threeDigitsIso: "EST",
+    dialCode: "233",
+  },
+  {
+    country: "Eswatini",
+    twoDigitsIso: "SZ",
+    threeDigitsIso: "SWZ",
+    dialCode: "748",
+  },
+  {
+    country: "Ethiopia",
+    twoDigitsIso: "ET",
+    threeDigitsIso: "ETH",
+    dialCode: "231",
+  },
+  {
+    country: "Falkland Islands [Malvinas]",
+    twoDigitsIso: "FK",
+    threeDigitsIso: "FLK",
+    dialCode: "238",
+  },
+  {
+    country: "Faroe Islands",
+    twoDigitsIso: "FO",
+    threeDigitsIso: "FRO",
+    dialCode: "234",
+  },
+  {
+    country: "Fiji",
+    twoDigitsIso: "FJ",
+    threeDigitsIso: "FJI",
+    dialCode: "242",
+  },
+  {
+    country: "Finland",
+    twoDigitsIso: "FI",
+    threeDigitsIso: "FIN",
+    dialCode: "246",
+  },
+  {
+    country: "France",
+    twoDigitsIso: "FR",
+    threeDigitsIso: "FRA",
+    dialCode: "250",
+  },
+  {
+    country: "French Guiana",
+    twoDigitsIso: "GF",
+    threeDigitsIso: "GUF",
+    dialCode: "254",
+  },
+  {
+    country: "French Polynesia",
+    twoDigitsIso: "PF",
+    threeDigitsIso: "PYF",
+    dialCode: "258",
+  },
+  {
+    country: "French Southern Territories",
+    twoDigitsIso: "TF",
+    threeDigitsIso: "ATF",
+    dialCode: "260",
+  },
+  {
+    country: "Gabon",
+    twoDigitsIso: "GA",
+    threeDigitsIso: "GAB",
+    dialCode: "266",
+  },
+  {
+    country: "Gambia",
+    twoDigitsIso: "GM",
+    threeDigitsIso: "GMB",
+    dialCode: "270",
+  },
+  {
+    country: "Georgia",
+    twoDigitsIso: "GE",
+    threeDigitsIso: "GEO",
+    dialCode: "268",
+  },
+  {
+    country: "Germany",
+    twoDigitsIso: "DE",
+    threeDigitsIso: "DEU",
+    dialCode: "276",
+  },
+  {
+    country: "Ghana",
+    twoDigitsIso: "GH",
+    threeDigitsIso: "GHA",
+    dialCode: "288",
+  },
+  {
+    country: "Gibraltar",
+    twoDigitsIso: "GI",
+    threeDigitsIso: "GIB",
+    dialCode: "292",
+  },
+  {
+    country: "Greece",
+    twoDigitsIso: "GR",
+    threeDigitsIso: "GRC",
+    dialCode: "300",
+  },
+  {
+    country: "Greenland",
+    twoDigitsIso: "GL",
+    threeDigitsIso: "GRL",
+    dialCode: "304",
+  },
+  {
+    country: "Grenada",
+    twoDigitsIso: "GD",
+    threeDigitsIso: "GRD",
+    dialCode: "308",
+  },
+  {
+    country: "Guadeloupe",
+    twoDigitsIso: "GP",
+    threeDigitsIso: "GLP",
+    dialCode: "312",
+  },
+  {
+    country: "Guam",
+    twoDigitsIso: "GU",
+    threeDigitsIso: "GUM",
+    dialCode: "316",
+  },
+  {
+    country: "Guatemala",
+    twoDigitsIso: "GT",
+    threeDigitsIso: "GTM",
+    dialCode: "320",
+  },
+  {
+    country: "Guernsey",
+    twoDigitsIso: "GG",
+    threeDigitsIso: "GGY",
+    dialCode: "831",
+  },
+  {
+    country: "Guinea",
+    twoDigitsIso: "GN",
+    threeDigitsIso: "GIN",
+    dialCode: "324",
+  },
+  {
+    country: "Guinea-Bissau",
+    twoDigitsIso: "GW",
+    threeDigitsIso: "GNB",
+    dialCode: "624",
+  },
+  {
+    country: "Guyana",
+    twoDigitsIso: "GY",
+    threeDigitsIso: "GUY",
+    dialCode: "328",
+  },
+  {
+    country: "Haiti",
+    twoDigitsIso: "HT",
+    threeDigitsIso: "HTI",
+    dialCode: "332",
+  },
+  {
+    country: "Heard Island and McDonald Islands",
+    twoDigitsIso: "HM",
+    threeDigitsIso: "HMD",
+    dialCode: "334",
+  },
+  {
+    country: "Holy See",
+    twoDigitsIso: "VA",
+    threeDigitsIso: "VAT",
+    dialCode: "336",
+  },
+  {
+    country: "Honduras",
+    twoDigitsIso: "HN",
+    threeDigitsIso: "HND",
+    dialCode: "340",
+  },
+  {
+    country: "Hong Kong",
+    twoDigitsIso: "HK",
+    threeDigitsIso: "HKG",
+    dialCode: "344",
+  },
+  {
+    country: "Hungary",
+    twoDigitsIso: "HU",
+    threeDigitsIso: "HUN",
+    dialCode: "348",
+  },
+  {
+    country: "Iceland",
+    twoDigitsIso: "IS",
+    threeDigitsIso: "ISL",
+    dialCode: "352",
+  },
+  {
+    country: "India",
+    twoDigitsIso: "IN",
+    threeDigitsIso: "IND",
+    dialCode: "356",
+  },
+  {
+    country: "Indonesia",
+    twoDigitsIso: "ID",
+    threeDigitsIso: "IDN",
+    dialCode: "360",
+  },
+  {
+    country: "Iran (Islamic Republic of)",
+    twoDigitsIso: "IR",
+    threeDigitsIso: "IRN",
+    dialCode: "364",
+  },
+  {
+    country: "Iraq",
+    twoDigitsIso: "IQ",
+    threeDigitsIso: "IRQ",
+    dialCode: "368",
+  },
+  {
+    country: "Ireland",
+    twoDigitsIso: "IE",
+    threeDigitsIso: "IRL",
+    dialCode: "372",
+  },
+  {
+    country: "Isle of Man",
+    twoDigitsIso: "IM",
+    threeDigitsIso: "IMN",
+    dialCode: "833",
+  },
+  {
+    country: "Israel",
+    twoDigitsIso: "IL",
+    threeDigitsIso: "ISR",
+    dialCode: "376",
+  },
+  {
+    country: "Italy",
+    twoDigitsIso: "IT",
+    threeDigitsIso: "ITA",
+    dialCode: "380",
+  },
+  {
+    country: "Jamaica",
+    twoDigitsIso: "JM",
+    threeDigitsIso: "JAM",
+    dialCode: "388",
+  },
+  {
+    country: "Japan",
+    twoDigitsIso: "JP",
+    threeDigitsIso: "JPN",
+    dialCode: "392",
+  },
+  {
+    country: "Jersey",
+    twoDigitsIso: "JE",
+    threeDigitsIso: "JEY",
+    dialCode: "832",
+  },
+  {
+    country: "Jordan",
+    twoDigitsIso: "JO",
+    threeDigitsIso: "JOR",
+    dialCode: "400",
+  },
+  {
+    country: "Kazakhstan",
+    twoDigitsIso: "KZ",
+    threeDigitsIso: "KAZ",
+    dialCode: "398",
+  },
+  {
+    country: "Kenya",
+    twoDigitsIso: "KE",
+    threeDigitsIso: "KEN",
+    dialCode: "404",
+  },
+  {
+    country: "Kiribati",
+    twoDigitsIso: "KI",
+    threeDigitsIso: "KIR",
+    dialCode: "296",
+  },
+  {
+    country: "Korea (the Democratic People's Republic of)",
+    twoDigitsIso: "KP",
+    threeDigitsIso: "PRK",
+    dialCode: "408",
+  },
+  {
+    country: "Korea (the Republic of)",
+    twoDigitsIso: "KR",
+    threeDigitsIso: "KOR",
+    dialCode: "410",
+  },
+  {
+    country: "Kuwait",
+    twoDigitsIso: "KW",
+    threeDigitsIso: "KWT",
+    dialCode: "414",
+  },
+  {
+    country: "Kyrgyzstan",
+    twoDigitsIso: "KG",
+    threeDigitsIso: "KGZ",
+    dialCode: "417",
+  },
+  {
+    country: "Lao People's Democratic Republic",
+    twoDigitsIso: "LA",
+    threeDigitsIso: "LAO",
+    dialCode: "418",
+  },
+  {
+    country: "Latvia",
+    twoDigitsIso: "LV",
+    threeDigitsIso: "LVA",
+    dialCode: "428",
+  },
+  {
+    country: "Lebanon",
+    twoDigitsIso: "LB",
+    threeDigitsIso: "LBN",
+    dialCode: "422",
+  },
+  {
+    country: "Lesotho",
+    twoDigitsIso: "LS",
+    threeDigitsIso: "LSO",
+    dialCode: "426",
+  },
+  {
+    country: "Liberia",
+    twoDigitsIso: "LR",
+    threeDigitsIso: "LBR",
+    dialCode: "430",
+  },
+  {
+    country: "Libya",
+    twoDigitsIso: "LY",
+    threeDigitsIso: "LBY",
+    dialCode: "434",
+  },
+  {
+    country: "Liechtenstein",
+    twoDigitsIso: "LI",
+    threeDigitsIso: "LIE",
+    dialCode: "438",
+  },
+  {
+    country: "Lithuania",
+    twoDigitsIso: "LT",
+    threeDigitsIso: "LTU",
+    dialCode: "440",
+  },
+  {
+    country: "Luxembourg",
+    twoDigitsIso: "LU",
+    threeDigitsIso: "LUX",
+    dialCode: "442",
+  },
+  {
+    country: "Macao",
+    twoDigitsIso: "MO",
+    threeDigitsIso: "MAC",
+    dialCode: "446",
+  },
+  {
+    country: "Madagascar",
+    twoDigitsIso: "MG",
+    threeDigitsIso: "MDG",
+    dialCode: "450",
+  },
+  {
+    country: "Malawi",
+    twoDigitsIso: "MW",
+    threeDigitsIso: "MWI",
+    dialCode: "454",
+  },
+  {
+    country: "Malaysia",
+    twoDigitsIso: "MY",
+    threeDigitsIso: "MYS",
+    dialCode: "458",
+  },
+  {
+    country: "Maldives",
+    twoDigitsIso: "MV",
+    threeDigitsIso: "MDV",
+    dialCode: "462",
+  },
+  {
+    country: "Mali",
+    twoDigitsIso: "ML",
+    threeDigitsIso: "MLI",
+    dialCode: "466",
+  },
+  {
+    country: "Malta",
+    twoDigitsIso: "MT",
+    threeDigitsIso: "MLT",
+    dialCode: "470",
+  },
+  {
+    country: "Marshall Islands",
+    twoDigitsIso: "MH",
+    threeDigitsIso: "MHL",
+    dialCode: "584",
+  },
+  {
+    country: "Martinique",
+    twoDigitsIso: "MQ",
+    threeDigitsIso: "MTQ",
+    dialCode: "474",
+  },
+  {
+    country: "Mauritania",
+    twoDigitsIso: "MR",
+    threeDigitsIso: "MRT",
+    dialCode: "478",
+  },
+  {
+    country: "Mauritius",
+    twoDigitsIso: "MU",
+    threeDigitsIso: "MUS",
+    dialCode: "480",
+  },
+  {
+    country: "Mayotte",
+    twoDigitsIso: "YT",
+    threeDigitsIso: "MYT",
+    dialCode: "175",
+  },
+  {
+    country: "Mexico",
+    twoDigitsIso: "MX",
+    threeDigitsIso: "MEX",
+    dialCode: "484",
+  },
+  {
+    country: "Micronesia (Federated States of)",
+    twoDigitsIso: "FM",
+    threeDigitsIso: "FSM",
+    dialCode: "583",
+  },
+  {
+    country: "Moldova (the Republic of)",
+    twoDigitsIso: "MD",
+    threeDigitsIso: "MDA",
+    dialCode: "498",
+  },
+  {
+    country: "Monaco",
+    twoDigitsIso: "MC",
+    threeDigitsIso: "MCO",
+    dialCode: "492",
+  },
+  {
+    country: "Mongolia",
+    twoDigitsIso: "MN",
+    threeDigitsIso: "MNG",
+    dialCode: "496",
+  },
+  {
+    country: "Montenegro",
+    twoDigitsIso: "ME",
+    threeDigitsIso: "MNE",
+    dialCode: "499",
+  },
+  {
+    country: "Montserrat",
+    twoDigitsIso: "MS",
+    threeDigitsIso: "MSR",
+    dialCode: "500",
+  },
+  {
+    country: "Morocco",
+    twoDigitsIso: "MA",
+    threeDigitsIso: "MAR",
+    dialCode: "504",
+  },
+  {
+    country: "Mozambique",
+    twoDigitsIso: "MZ",
+    threeDigitsIso: "MOZ",
+    dialCode: "508",
+  },
+  {
+    country: "Myanmar",
+    twoDigitsIso: "MM",
+    threeDigitsIso: "MMR",
+    dialCode: "104",
+  },
+  {
+    country: "Namibia",
+    twoDigitsIso: "NA",
+    threeDigitsIso: "NAM",
+    dialCode: "516",
+  },
+  {
+    country: "Nauru",
+    twoDigitsIso: "NR",
+    threeDigitsIso: "NRU",
+    dialCode: "520",
+  },
+  {
+    country: "Nepal",
+    twoDigitsIso: "NP",
+    threeDigitsIso: "NPL",
+    dialCode: "524",
+  },
+  {
+    country: "Netherlands",
+    twoDigitsIso: "NL",
+    threeDigitsIso: "NLD",
+    dialCode: "528",
+  },
+  {
+    country: "New Caledonia",
+    twoDigitsIso: "NC",
+    threeDigitsIso: "NCL",
+    dialCode: "540",
+  },
+  {
+    country: "New Zealand",
+    twoDigitsIso: "NZ",
+    threeDigitsIso: "NZL",
+    dialCode: "554",
+  },
+  {
+    country: "Nicaragua",
+    twoDigitsIso: "NI",
+    threeDigitsIso: "NIC",
+    dialCode: "558",
+  },
+  {
+    country: "Niger",
+    twoDigitsIso: "NE",
+    threeDigitsIso: "NER",
+    dialCode: "562",
+  },
+  {
+    country: "Nigeria",
+    twoDigitsIso: "NG",
+    threeDigitsIso: "NGA",
+    dialCode: "566",
+  },
+  {
+    country: "Niue",
+    twoDigitsIso: "NU",
+    threeDigitsIso: "NIU",
+    dialCode: "570",
+  },
+  {
+    country: "Norfolk Island",
+    twoDigitsIso: "NF",
+    threeDigitsIso: "NFK",
+    dialCode: "574",
+  },
+  {
+    country: "Northern Mariana Islands",
+    twoDigitsIso: "MP",
+    threeDigitsIso: "MNP",
+    dialCode: "580",
+  },
+  {
+    country: "Norway",
+    twoDigitsIso: "NO",
+    threeDigitsIso: "NOR",
+    dialCode: "578",
+  },
+  {
+    country: "Oman",
+    twoDigitsIso: "OM",
+    threeDigitsIso: "OMN",
+    dialCode: "512",
+  },
+  {
+    country: "Pakistan",
+    twoDigitsIso: "PK",
+    threeDigitsIso: "PAK",
+    dialCode: "586",
+  },
+  {
+    country: "Palau",
+    twoDigitsIso: "PW",
+    threeDigitsIso: "PLW",
+    dialCode: "585",
+  },
+  {
+    country: "Palestine, State of",
+    twoDigitsIso: "PS",
+    threeDigitsIso: "PSE",
+    dialCode: "275",
+  },
+  {
+    country: "Panama",
+    twoDigitsIso: "PA",
+    threeDigitsIso: "PAN",
+    dialCode: "591",
+  },
+  {
+    country: "Papua New Guinea",
+    twoDigitsIso: "PG",
+    threeDigitsIso: "PNG",
+    dialCode: "598",
+  },
+  {
+    country: "Paraguay",
+    twoDigitsIso: "PY",
+    threeDigitsIso: "PRY",
+    dialCode: "600",
+  },
+  {
+    country: "Peru",
+    twoDigitsIso: "PE",
+    threeDigitsIso: "PER",
+    dialCode: "604",
+  },
+  {
+    country: "Philippines",
+    twoDigitsIso: "PH",
+    threeDigitsIso: "PHL",
+    dialCode: "608",
+  },
+  {
+    country: "Pitcairn",
+    twoDigitsIso: "PN",
+    threeDigitsIso: "PCN",
+    dialCode: "612",
+  },
+  {
+    country: "Poland",
+    twoDigitsIso: "PL",
+    threeDigitsIso: "POL",
+    dialCode: "616",
+  },
+  {
+    country: "Portugal",
+    twoDigitsIso: "PT",
+    threeDigitsIso: "PRT",
+    dialCode: "620",
+  },
+  {
+    country: "Puerto Rico",
+    twoDigitsIso: "PR",
+    threeDigitsIso: "PRI",
+    dialCode: "630",
+  },
+  {
+    country: "Qatar",
+    twoDigitsIso: "QA",
+    threeDigitsIso: "QAT",
+    dialCode: "634",
+  },
+  {
+    country: "Republic of North Macedonia",
+    twoDigitsIso: "MK",
+    threeDigitsIso: "MKD",
+    dialCode: "807",
+  },
+  {
+    country: "Romania",
+    twoDigitsIso: "RO",
+    threeDigitsIso: "ROU",
+    dialCode: "642",
+  },
+  {
+    country: "Russian Federation",
+    twoDigitsIso: "RU",
+    threeDigitsIso: "RUS",
+    dialCode: "643",
+  },
+  {
+    country: "Rwanda",
+    twoDigitsIso: "RW",
+    threeDigitsIso: "RWA",
+    dialCode: "646",
+  },
+  {
+    country: "Réunion",
+    twoDigitsIso: "RE",
+    threeDigitsIso: "REU",
+    dialCode: "638",
+  },
+  {
+    country: "Saint Barthélemy",
+    twoDigitsIso: "BL",
+    threeDigitsIso: "BLM",
+    dialCode: "652",
+  },
+  {
+    country: "Saint Helena, Ascension and Tristan da Cunha",
+    twoDigitsIso: "SH",
+    threeDigitsIso: "SHN",
+    dialCode: "654",
+  },
+  {
+    country: "Saint Kitts and Nevis",
+    twoDigitsIso: "KN",
+    threeDigitsIso: "KNA",
+    dialCode: "659",
+  },
+  {
+    country: "Saint Lucia",
+    twoDigitsIso: "LC",
+    threeDigitsIso: "LCA",
+    dialCode: "662",
+  },
+  {
+    country: "Saint Martin (French part)",
+    twoDigitsIso: "MF",
+    threeDigitsIso: "MAF",
+    dialCode: "663",
+  },
+  {
+    country: "Saint Pierre and Miquelon",
+    twoDigitsIso: "PM",
+    threeDigitsIso: "SPM",
+    dialCode: "666",
+  },
+  {
+    country: "Saint Vincent and the Grenadines",
+    twoDigitsIso: "VC",
+    threeDigitsIso: "VCT",
+    dialCode: "670",
+  },
+  {
+    country: "Samoa",
+    twoDigitsIso: "WS",
+    threeDigitsIso: "WSM",
+    dialCode: "882",
+  },
+  {
+    country: "San Marino",
+    twoDigitsIso: "SM",
+    threeDigitsIso: "SMR",
+    dialCode: "674",
+  },
+  {
+    country: "Sao Tome and Principe",
+    twoDigitsIso: "ST",
+    threeDigitsIso: "STP",
+    dialCode: "678",
+  },
+  {
+    country: "Saudi Arabia",
+    twoDigitsIso: "SA",
+    threeDigitsIso: "SAU",
+    dialCode: "682",
+  },
+  {
+    country: "Senegal",
+    twoDigitsIso: "SN",
+    threeDigitsIso: "SEN",
+    dialCode: "686",
+  },
+  {
+    country: "Serbia",
+    twoDigitsIso: "RS",
+    threeDigitsIso: "SRB",
+    dialCode: "688",
+  },
+  {
+    country: "Seychelles",
+    twoDigitsIso: "SC",
+    threeDigitsIso: "SYC",
+    dialCode: "690",
+  },
+  {
+    country: "Sierra Leone",
+    twoDigitsIso: "SL",
+    threeDigitsIso: "SLE",
+    dialCode: "694",
+  },
+  {
+    country: "Singapore",
+    twoDigitsIso: "SG",
+    threeDigitsIso: "SGP",
+    dialCode: "702",
+  },
+  {
+    country: "Sint Maarten (Dutch part)",
+    twoDigitsIso: "SX",
+    threeDigitsIso: "SXM",
+    dialCode: "534",
+  },
+  {
+    country: "Slovakia",
+    twoDigitsIso: "SK",
+    threeDigitsIso: "SVK",
+    dialCode: "703",
+  },
+  {
+    country: "Slovenia",
+    twoDigitsIso: "SI",
+    threeDigitsIso: "SVN",
+    dialCode: "705",
+  },
+  {
+    country: "Solomon Islands",
+    twoDigitsIso: "SB",
+    threeDigitsIso: "SLB",
+    dialCode: "090",
+  },
+  {
+    country: "Somalia",
+    twoDigitsIso: "SO",
+    threeDigitsIso: "SOM",
+    dialCode: "706",
+  },
+  {
+    country: "South Africa",
+    twoDigitsIso: "ZA",
+    threeDigitsIso: "ZAF",
+    dialCode: "710",
+  },
+  {
+    country: "South Georgia and the South Sandwich Islands",
+    twoDigitsIso: "GS",
+    threeDigitsIso: "SGS",
+    dialCode: "239",
+  },
+  {
+    country: "South Sudan",
+    twoDigitsIso: "SS",
+    threeDigitsIso: "SSD",
+    dialCode: "728",
+  },
+  {
+    country: "Spain",
+    twoDigitsIso: "ES",
+    threeDigitsIso: "ESP",
+    dialCode: "724",
+  },
+  {
+    country: "Sri Lanka",
+    twoDigitsIso: "LK",
+    threeDigitsIso: "LKA",
+    dialCode: "144",
+  },
+  {
+    country: "Sudan",
+    twoDigitsIso: "SD",
+    threeDigitsIso: "SDN",
+    dialCode: "729",
+  },
+  {
+    country: "Suriname",
+    twoDigitsIso: "SR",
+    threeDigitsIso: "SUR",
+    dialCode: "740",
+  },
+  {
+    country: "Svalbard and Jan Mayen",
+    twoDigitsIso: "SJ",
+    threeDigitsIso: "SJM",
+    dialCode: "744",
+  },
+  {
+    country: "Sweden",
+    twoDigitsIso: "SE",
+    threeDigitsIso: "SWE",
+    dialCode: "752",
+  },
+  {
+    country: "Switzerland",
+    twoDigitsIso: "CH",
+    threeDigitsIso: "CHE",
+    dialCode: "756",
+  },
+  {
+    country: "Syrian Arab Republic",
+    twoDigitsIso: "SY",
+    threeDigitsIso: "SYR",
+    dialCode: "760",
+  },
+  {
+    country: "Taiwan (Province of China)",
+    twoDigitsIso: "TW",
+    threeDigitsIso: "TWN",
+    dialCode: "158",
+  },
+  {
+    country: "Tajikistan",
+    twoDigitsIso: "TJ",
+    threeDigitsIso: "TJK",
+    dialCode: "762",
+  },
+  {
+    country: "Tanzania, United Republic of",
+    twoDigitsIso: "TZ",
+    threeDigitsIso: "TZA",
+    dialCode: "834",
+  },
+  {
+    country: "Thailand",
+    twoDigitsIso: "TH",
+    threeDigitsIso: "THA",
+    dialCode: "764",
+  },
+  {
+    country: "Timor-Leste",
+    twoDigitsIso: "TL",
+    threeDigitsIso: "TLS",
+    dialCode: "626",
+  },
+  {
+    country: "Togo",
+    twoDigitsIso: "TG",
+    threeDigitsIso: "TGO",
+    dialCode: "768",
+  },
+  {
+    country: "Tokelau",
+    twoDigitsIso: "TK",
+    threeDigitsIso: "TKL",
+    dialCode: "772",
+  },
+  {
+    country: "Tonga",
+    twoDigitsIso: "TO",
+    threeDigitsIso: "TON",
+    dialCode: "776",
+  },
+  {
+    country: "Trinidad and Tobago",
+    twoDigitsIso: "TT",
+    threeDigitsIso: "TTO",
+    dialCode: "780",
+  },
+  {
+    country: "Tunisia",
+    twoDigitsIso: "TN",
+    threeDigitsIso: "TUN",
+    dialCode: "788",
+  },
+  {
+    country: "Turkey",
+    twoDigitsIso: "TR",
+    threeDigitsIso: "TUR",
+    dialCode: "792",
+  },
+  {
+    country: "Turkmenistan",
+    twoDigitsIso: "TM",
+    threeDigitsIso: "TKM",
+    dialCode: "795",
+  },
+  {
+    country: "Turks and Caicos Islands",
+    twoDigitsIso: "TC",
+    threeDigitsIso: "TCA",
+    dialCode: "796",
+  },
+  {
+    country: "Tuvalu",
+    twoDigitsIso: "TV",
+    threeDigitsIso: "TUV",
+    dialCode: "798",
+  },
+  {
+    country: "Uganda",
+    twoDigitsIso: "UG",
+    threeDigitsIso: "UGA",
+    dialCode: "800",
+  },
+  {
+    country: "Ukraine",
+    twoDigitsIso: "UA",
+    threeDigitsIso: "UKR",
+    dialCode: "804",
+  },
+  {
+    country: "United Arab Emirates",
+    twoDigitsIso: "AE",
+    threeDigitsIso: "ARE",
+    dialCode: "784",
+  },
+  {
+    country: "United Kingdom of Great Britain and Northern Ireland",
+    twoDigitsIso: "GB",
+    threeDigitsIso: "GBR",
+    dialCode: "826",
+  },
+  {
+    country: "United States Minor Outlying Islands",
+    twoDigitsIso: "UM",
+    threeDigitsIso: "UMI",
+    dialCode: "581",
+  },
+  {
+    country: "United States of America",
+    twoDigitsIso: "US",
+    threeDigitsIso: "USA",
+    dialCode: "840",
+  },
+  {
+    country: "Uruguay",
+    twoDigitsIso: "UY",
+    threeDigitsIso: "URY",
+    dialCode: "858",
+  },
+  {
+    country: "Uzbekistan",
+    twoDigitsIso: "UZ",
+    threeDigitsIso: "UZB",
+    dialCode: "860",
+  },
+  {
+    country: "Vanuatu",
+    twoDigitsIso: "VU",
+    threeDigitsIso: "VUT",
+    dialCode: "548",
+  },
+  {
+    country: "Venezuela (Bolivarian Republic of)",
+    twoDigitsIso: "VE",
+    threeDigitsIso: "VEN",
+    dialCode: "862",
+  },
+  {
+    country: "Viet Nam",
+    twoDigitsIso: "VN",
+    threeDigitsIso: "VNM",
+    dialCode: "704",
+  },
+  {
+    country: "Western Sahara",
+    twoDigitsIso: "EH",
+    threeDigitsIso: "ESH",
+    dialCode: "732",
+  },
+  {
+    country: "Yemen",
+    twoDigitsIso: "YE",
+    threeDigitsIso: "YEM",
+    dialCode: "887",
+  },
+  {
+    country: "Zambia",
+    twoDigitsIso: "ZM",
+    threeDigitsIso: "ZMB",
+    dialCode: "894",
+  },
+  {
+    country: "Zimbabwe",
+    twoDigitsIso: "ZW",
+    threeDigitsIso: "ZWE",
+    dialCode: "716",
+  },
+];
+    
+    function getUTMParameters() {
+        
+       
+        const urlParams = new URLSearchParams(window.location.search);
+       
+        return {
+            UTM_campaign: urlParams.get('utm_campaign'),
+            UTM_source: urlParams.get('utm_source'),
+            UTM_content: urlParams.get('utm_content'),
+            UTM_medium: urlParams.get('utm_medium'),
+            UTM_term: urlParams.get('utm_term')
+        };
+    }
+    function setLeadSourceValue(){
+         const urlParams = new URLSearchParams(window.location.search);
+         //document.getElementById("form-field-lead_source").value = urlParams.get('utm_source');
+    }
+window.onload = setLeadSourceValue;
+// window.onload=sendMessage("+971543171621", "Hello, Muhammad!");
+window.onload = function() {
+      const input = document.getElementById("form-field-phone");
+      console.log("input",input)
+       input.setAttribute("placeholder", "+971501234567");
+    };
+    function getUserAgent(){
+        return navigator.userAgent;
+    }
+    function getPlatform(){
+        return navigator.platform;
+    }
+   function detectBrowser() {
+    var userAgent = navigator.userAgent;
+    if (userAgent.indexOf("Edg") > -1) {
+        return "Microsoft Edge";
+    } else if (userAgent.indexOf("Chrome") > -1) {
+        return "Chrome";
+    } else if (userAgent.indexOf("Firefox") > -1) {
+        return "Firefox";
+    } else if (userAgent.indexOf("Safari") > -1) {
+        return "Safari";
+    } else if (userAgent.indexOf("Opera") > -1) {
+        return "Opera";
+    } else if (userAgent.indexOf("Trident") > -1 || userAgent.indexOf("MSIE") > -1) {
+        return "Internet Explorer";
+    }
+
+    return "Unknown";
+}
+    // Function to determine the language based on the current URL
+    function getLanguageFromURL() {
+        const url = window.location.href;
+ 
+        if (url.includes("/ar/")) {
+            return "1"; // Arabic
+        } else if (url.includes("/en/")) {
+            return "2"; // English
+        } else if (url.includes("/gold/")) {
+            return "en"; // Default to English for gold page
+        }
+ 
+        return "2"; // Default to English if no specific language is found
+    }
+     const button = document.getElementById("otpButton");
+     let randomNum = Math.random() * 9000;
+    randomNum = Math.floor(1000 + randomNum);
+    // Add an onclick function
+     
+    button.onclick = function() {
+        const tel = document.getElementById("form-field-phone").value;
+        const telElement = document.getElementById("form-field-phone");
+        if(!tel){
+           
+      // Set a custom validity message if the field is invalid
+      telElement.setCustomValidity("Please enter mobile number");
+telElement.reportValidity()
+        
+        }
+        else{
+            
+             sendMessage(tel, randomNum);
+        }
+    
+    };
+ 
+ 
+    const form = document.getElementById("atfx_sf_form");
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        
+        // Create a FormData object from the form
+        const formData = new FormData(form);
+ 
+        // Retrieve form values
+        const firstName = document.getElementById("form-field-first_name").value;
+        const lastName = document.getElementById("form-field-last_name").value;
+        const tel = document.getElementById("form-field-phone").value;
+        const email = document.getElementById("form-field-email").value;
+        // const mobile = document.getElementById("form-field-phone").value;
+        const experience = document.getElementById("form-field-experience").value;
+        
+
+        const element = document.getElementsByClassName('iti__selected-country')[0];
+         const follower = document.getElementById("follower").checked;
+         const provider = document.getElementById("provider").checked; 
+         console.log("values are",follower,provider)
+         let comments="";
+         if (follower){
+              comments="Lead Type:Follower"
+         }
+         else{
+              comments="Lead Type:Provider"
+         }
+
+// Access the 'title' attribute of the element
+const title = element.getAttribute('title');
+
+//getting country
+
+let country=title.split(":")[0]
+let country_code=title.split(":")[1]
+const countryIsoCode=countriesCodes.find((data)=>data.country===country)?.threeDigitsIso
+
+console.log("mobile is",country_code)
+
+document.getElementById("form-field-country_of_residence").value = countryIsoCode;
+        
+        
+        // Retrieve the select element
+    // const mobileCountryCodeSelect = document.getElementById("form-field-mobile_country_code");
+ 
+        // const mobileCountryCode = mobileCountryCodeSelect.options[mobileCountryCodeSelect.selectedIndex].text;
+        // const country = mobileCountryCodeSelect.value;
+        // Set the language variable
+        const language = getLanguageFromURL();
+        // Get UTM parameters
+        const utmParams = getUTMParameters();
+        const userAgent = getUserAgent();
+        const platform = getPlatform()
+        const browser =detectBrowser()
+        formData.append("access_token", "&)Ln!O]sWP}U");
+        formData.append("language", language);
+        // formData.append("mobile_country_code", mobileCountryCode);
+        formData.append("page_url", window.location.href);  // Optional
+        formData.append("user_agent",userAgent)
+        formData.append("platform",platform)
+        formData.append("browser",browser)
+        formData.append("comments",comments)
+        formData.append("country",country)
+        formData.append("country_code",country_code)
+        // Add UTM parameters only if they are not null
+        for (const [key, value] of Object.entries(utmParams)) {
+            if (value) {
+                formData.append(key, value); // Add to formData if not null
+            }
+        }
+
+        fetch("https://admin.atfx.digital/en/lp_api/add", {
+            method: "POST",
+            // mode: "no-cors", // Add this line 
+            body: formData, // Send the FormData directly
+        })
+        .then(response => {
+            //  setCookie("redirectLink",response.redirect_link,1)
+            console.log("response is:", response);
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.text();
+        })
+        .then((data) => {
+            setCookie("redirectLink",data,1)
+            console.log("API response:", data);
+            
+        })
+        .catch((error) => {
+            console.error("API error:", error);
+        });
+    });
+
+</script>
